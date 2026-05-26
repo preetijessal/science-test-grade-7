@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grade 7 Science — Structures Online Test</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #2E75B6; --dark: #1F4E79; --green: #22c55e; --red: #ef4444;
+      --yellow: #fbbf24; --bg: #f0f4ff; --white: #fff; --gray: #64748b;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Nunito',sans-serif; background:var(--bg); color:#1e293b; min-height:100vh; }
+
+    /* COVER */
+    #cover {
+      min-height:100vh; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; text-align:center; padding:2rem;
+      background:linear-gradient(135deg,#1F4E79 0%,#2E75B6 50%,#4BBDE8 100%);
+      color:white;
+    }
+    #cover h1 { font-size:clamp(2rem,6vw,3.5rem); font-weight:800; margin-bottom:.5rem; }
+    #cover h2 { font-size:clamp(1rem,3vw,1.5rem); font-weight:600; opacity:.85; margin-bottom:2rem; }
+    .info-grid { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-bottom:2.5rem; }
+    .info-pill { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3);
+      border-radius:999px; padding:.5rem 1.4rem; font-size:.95rem; font-weight:700; }
+    #startBtn {
+      background:var(--yellow); color:#1e293b; font-family:'Nunito',sans-serif;
+      font-size:1.2rem; font-weight:800; padding:1rem 3rem; border:none;
+      border-radius:999px; cursor:pointer; transition:transform .2s,box-shadow .2s;
+      box-shadow:0 6px 24px rgba(0,0,0,.2);
+    }
+    #startBtn:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,0,0,.25); }
+
+    /* QUIZ */
+    #quiz { display:none; max-width:800px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+    .progress-wrap { position:sticky; top:0; z-index:10; background:var(--bg);
+      padding:.75rem 0 .5rem; margin-bottom:1.5rem; }
+    .progress-top { display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:.4rem; font-size:.9rem; font-weight:700; color:var(--dark); }
+    .progress-bar { height:10px; background:#dbeafe; border-radius:999px; overflow:hidden; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--blue),#4BBDE8);
+      border-radius:999px; transition:width .4s; }
+
+    .q-card { background:var(--white); border-radius:1.5rem; padding:2rem;
+      box-shadow:0 4px 24px rgba(0,0,0,.07); margin-bottom:2rem; }
+    .q-num { font-size:.8rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--blue); margin-bottom:.5rem; }
+    .q-section { font-size:.75rem; font-weight:700; background:#eff6ff; color:var(--blue);
+      border-radius:999px; padding:.2rem .8rem; display:inline-block; margin-bottom:.75rem; }
+    .q-text { font-size:1.05rem; font-weight:700; line-height:1.5; margin-bottom:1.25rem; }
+    .q-text .pts { font-size:.8rem; color:var(--gray); font-weight:600; }
+
+    /* MC options */
+    .options { display:flex; flex-direction:column; gap:.6rem; }
+    .option {
+      display:flex; align-items:center; gap:.75rem; padding:.8rem 1rem;
+      border:2px solid #e2e8f0; border-radius:.9rem; cursor:pointer;
+      transition:all .2s; font-size:.95rem; font-weight:600;
+    }
+    .option:hover { border-color:var(--blue); background:#eff6ff; }
+    .option.selected { border-color:var(--blue); background:#dbeafe; }
+    .option.correct { border-color:var(--green); background:#dcfce7 !important; }
+    .option.wrong { border-color:var(--red); background:#fee2e2 !important; }
+    .option.show-correct { border-color:var(--green); background:#dcfce7 !important; }
+    .opt-letter {
+      width:32px; height:32px; border-radius:50%; background:#e2e8f0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.85rem; font-weight:800; flex-shrink:0; transition:all .2s;
+    }
+    .selected .opt-letter { background:var(--blue); color:white; }
+    .correct .opt-letter { background:var(--green); color:white; }
+    .wrong .opt-letter { background:var(--red); color:white; }
+    .show-correct .opt-letter { background:var(--green); color:white; }
+
+    /* Short answer */
+    .short-answer { width:100%; min-height:80px; padding:.75rem 1rem;
+      border:2px solid #e2e8f0; border-radius:.9rem; font-family:'Nunito',sans-serif;
+      font-size:.95rem; resize:vertical; transition:border-color .2s; }
+    .short-answer:focus { outline:none; border-color:var(--blue); }
+
+    /* Match */
+    .match-row { display:grid; grid-template-columns:1fr 60px 1fr; gap:.5rem;
+      align-items:center; margin-bottom:.5rem; }
+    .match-left { background:#eff6ff; border-radius:.7rem; padding:.6rem .9rem;
+      font-size:.9rem; font-weight:600; color:var(--dark); }
+    .match-select {
+      padding:.4rem .3rem; border:2px solid #e2e8f0; border-radius:.7rem;
+      font-family:'Nunito',sans-serif; font-size:.85rem; font-weight:700; text-align:center;
+    }
+    .match-right { background:#f8fafc; border-radius:.7rem; padding:.6rem .9rem;
+      font-size:.85rem; color:var(--gray); }
+
+    /* Feedback */
+    .feedback { display:none; margin-top:.75rem; padding:.75rem 1rem;
+      border-radius:.75rem; font-size:.9rem; font-weight:600; }
+    .feedback.correct { display:block; background:#dcfce7; color:#166534; }
+    .feedback.wrong { display:block; background:#fee2e2; color:#991b1b; }
+    .feedback.info { display:block; background:#eff6ff; color:#1e40af; }
+
+    /* Nav */
+    .nav-row { display:flex; justify-content:space-between; align-items:center;
+      margin-top:1.5rem; flex-wrap:wrap; gap:.75rem; }
+    .btn {
+      padding:.7rem 1.8rem; border-radius:999px; border:none; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:1rem; font-weight:800;
+      transition:transform .15s, box-shadow .15s;
+    }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(0,0,0,.15); }
+    .btn-primary { background:var(--blue); color:white; }
+    .btn-secondary { background:#e2e8f0; color:var(--dark); }
+    .btn-submit { background:var(--green); color:white; }
+
+    /* RESULTS */
+    #results { display:none; max-width:760px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+    .result-hero { text-align:center; background:linear-gradient(135deg,var(--dark),var(--blue));
+      color:white; border-radius:2rem; padding:3rem 2rem; margin-bottom:2rem; }
+    .score-big { font-size:5rem; font-weight:800; line-height:1; }
+    .score-label { font-size:1.1rem; opacity:.85; margin-top:.25rem; }
+    .score-grade { font-size:1.5rem; font-weight:800; margin-top:.75rem; }
+    .breakdown-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:1rem; margin-bottom:2rem; }
+    .bk-card { background:white; border-radius:1.25rem; padding:1.25rem; text-align:center;
+      box-shadow:0 3px 12px rgba(0,0,0,.06); }
+    .bk-card .bk-icon { font-size:2rem; margin-bottom:.3rem; }
+    .bk-card .bk-val { font-size:1.8rem; font-weight:800; color:var(--dark); }
+    .bk-card .bk-lbl { font-size:.8rem; color:var(--gray); font-weight:600; }
+    .review-item { background:white; border-radius:1.25rem; padding:1.5rem;
+      margin-bottom:1rem; box-shadow:0 3px 12px rgba(0,0,0,.06);
+      border-left:5px solid #e2e8f0; }
+    .review-item.correct { border-left-color:var(--green); }
+    .review-item.wrong { border-left-color:var(--red); }
+    .review-item.manual { border-left-color:var(--yellow); }
+    .ri-q { font-size:.95rem; font-weight:700; margin-bottom:.5rem; }
+    .ri-your { font-size:.85rem; margin-bottom:.25rem; }
+    .ri-answer { font-size:.85rem; color:#166534; font-weight:700; }
+    .restart-btn {
+      display:block; width:100%; background:var(--dark); color:white;
+      font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:800;
+      padding:1rem; border:none; border-radius:999px; cursor:pointer;
+      margin-top:2rem; transition:transform .2s;
+    }
+    .restart-btn:hover { transform:translateY(-2px); }
+
+    @media(max-width:540px) {
+      .match-row { grid-template-columns:1fr 50px; }
+      .match-right { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div id="cover">
+  <div style="font-size:3rem;margin-bottom:1rem;">🔬🏗️</div>
+  <h1>Grade 7 Science</h1>
+  <h2>Form, Function & Design of Structures</h2>
+  <div class="info-grid">
+    <div class="info-pill">📝 30 Questions</div>
+    <div class="info-pill">⏱️ ~25 minutes</div>
+    <div class="info-pill">🏆 Instant Results</div>
+    <div class="info-pill">📚 Ontario Curriculum</div>
+  </div>
+  <button id="startBtn" onclick="startQuiz()">🚀 Start Test</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span id="progText">Question 1 of 30</span>
+      <span id="progScore">Score: 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+  <div id="qContainer"></div>
+  <div class="nav-row">
+    <button class="btn btn-secondary" id="prevBtn" onclick="navigate(-1)" style="display:none">← Previous</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+    <button class="btn btn-submit" id="submitBtn" onclick="submitTest()" style="display:none">Submit Test ✓</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results"></div>
+
+<script>
+const questions = [
+  // SECTION A — Definitions / MC
+  { section:"Section A — Definitions & Concepts", type:"mc", pts:1,
+    q:"What does 'form' mean when describing a structure?",
+    opts:["The purpose or job of a structure","The shape, structure, or physical appearance","The strength of the materials used","The cost of building the structure"],
+    ans:1, exp:"Form = shape/appearance. Function = purpose." },
+  { section:"Section A", type:"mc", pts:1,
+    q:"What does 'function' mean when describing a structure?",
+    opts:["The colour and style of a structure","How tall the structure is","The purpose or job the structure is designed to do","The type of materials used"],
+    ans:2, exp:"Function is the purpose — what the structure is designed to do." },
+  { section:"Section A", type:"mc", pts:1,
+    q:"The Form Follows Function principle means:",
+    opts:["Beauty is the most important design consideration","A structure's shape should be determined by its purpose","Function should be ignored in favour of appearance","Structures should always be symmetrical"],
+    ans:1, exp:"Form Follows Function: design the shape to suit the purpose." },
+  { section:"Section A", type:"mc", pts:1,
+    q:"Which is the BEST example of Form Follows Function?",
+    opts:["Painting a bridge bright red for decoration","Designing an airplane wing curved to generate lift","Building a school with extra-tall ceilings for no reason","Adding decorative pillars that hold no weight"],
+    ans:1, exp:"The airplane wing's curved shape directly serves its function of generating lift." },
+
+  // SECTION B — Forces
+  { section:"Section B — Forces", type:"mc", pts:1,
+    q:"Which type of force PULLS or STRETCHES a material apart?",
+    opts:["Compression","Torsion","Shear","Tension"],
+    ans:3, exp:"Tension pulls/stretches. Think: a rope in tug-of-war." },
+  { section:"Section B", type:"mc", pts:1,
+    q:"Which type of force PUSHES or SQUEEZES a material together?",
+    opts:["Tension","Bending","Compression","Torsion"],
+    ans:2, exp:"Compression squeezes. Think: chair legs supporting your weight." },
+  { section:"Section B", type:"mc", pts:1,
+    q:"Scissors cutting through paper is the best example of which force?",
+    opts:["Tension","Compression","Torsion","Shear"],
+    ans:3, exp:"Shear = two forces pushing in opposite directions — like scissor blades." },
+  { section:"Section B", type:"mc", pts:1,
+    q:"Wringing out a wet cloth demonstrates which force?",
+    opts:["Tension","Bending","Shear","Torsion"],
+    ans:3, exp:"Torsion = twisting force." },
+  { section:"Section B", type:"mc", pts:1,
+    q:"A diving board bends when someone stands on the end. What combination of forces causes bending?",
+    opts:["Shear and torsion","Tension on the top and compression on the bottom","Compression on both sides","Torsion and shear"],
+    ans:1, exp:"Bending creates tension on one side and compression on the other." },
+  { section:"Section B", type:"mc", pts:1,
+    q:"The weight of a bridge's own beams and concrete is called a:",
+    opts:["Live load","Dynamic load","Dead load","External load"],
+    ans:2, exp:"Dead load = permanent weight of the structure itself." },
+
+  // SECTION C — Structures
+  { section:"Section C — Structure Types", type:"mc", pts:1,
+    q:"An egg is the best example of which type of structure?",
+    opts:["Solid structure","Frame structure","Shell structure","Combination structure"],
+    ans:2, exp:"Shell structures are thin-walled and hollow — like an egg or helmet." },
+  { section:"Section C", type:"mc", pts:1,
+    q:"A bicycle frame is an example of which type of structure?",
+    opts:["Solid structure","Frame structure","Shell structure","Beam structure"],
+    ans:1, exp:"Frame structures use an open framework of beams/bars — like a bicycle frame." },
+  { section:"Section C", type:"mc", pts:1,
+    q:"A concrete dam is an example of which type of structure?",
+    opts:["Frame structure","Shell structure","Solid structure","Cable-stayed structure"],
+    ans:2, exp:"Solid structures are made of solid material throughout — very strong and heavy." },
+  { section:"Section C", type:"mc", pts:1,
+    q:"Which bridge type can span the LONGEST distances?",
+    opts:["Beam bridge","Arch bridge","Truss bridge","Suspension bridge"],
+    ans:3, exp:"Suspension bridges (like the Golden Gate) can span very long distances." },
+  { section:"Section C", type:"mc", pts:1,
+    q:"Why are triangles used in truss bridges?",
+    opts:["They look more attractive","They are the strongest polygon — cannot deform without changing side length","They are lighter than rectangles","They are easier to build"],
+    ans:1, exp:"Triangles cannot change shape without changing side length — making them the strongest polygon." },
+
+  // SECTION D — Safety & Codes
+  { section:"Section D — Failure & Safety", type:"mc", pts:1,
+    q:"Which of the following is a cause of structural failure due to OVERLOAD?",
+    opts:["A rusting iron beam","Too many people standing on a balcony","A crack left unrepaired","Poor original design"],
+    ans:1, exp:"Overload = too much force/weight beyond the structure's design limit." },
+  { section:"Section D", type:"mc", pts:1,
+    q:"What does the Ontario Building Code (OBC) do?",
+    opts:["Designs buildings for architects","Rates the aesthetic beauty of buildings","Sets minimum safety requirements for construction in Ontario","Measures the weight of structures"],
+    ans:2, exp:"The OBC sets minimum requirements to ensure buildings are safe." },
+  { section:"Section D", type:"mc", pts:1,
+    q:"A house sinking because the soil underneath shifts is an example of:",
+    opts:["Material failure","Foundation failure","Natural disaster","Poor design"],
+    ans:1, exp:"Foundation failure occurs when the base or ground supporting the structure collapses or shifts." },
+  { section:"Section D", type:"mc", pts:1,
+    q:"Ergonomics is the science of:",
+    opts:["Making structures look beautiful","Designing products to fit the human body comfortably and safely","Testing the strength of materials","Calculating the weight of structures"],
+    ans:1, exp:"Ergonomics = designing for human comfort, safety, and efficiency." },
+  { section:"Section D", type:"mc", pts:1,
+    q:"Symmetry helps structures because:",
+    opts:["It makes them look more attractive only","It distributes forces evenly, improving stability","It reduces the weight of the structure","It makes them easier to paint"],
+    ans:1, exp:"Symmetry distributes forces evenly, making structures more stable." },
+
+  // SECTION E — Short Answer
+  { section:"Section E — Short Answer", type:"short", pts:2,
+    q:"Explain the difference between a LIVE LOAD and a DEAD LOAD. Give one example of each.",
+    modelAns:"Dead load = permanent weight of the structure itself (e.g., the concrete and steel beams of a bridge). Live load = moving or changing forces applied to the structure (e.g., cars driving over a bridge, people walking on a floor)." },
+  { section:"Section E", type:"short", pts:2,
+    q:"Why is the 'Form Follows Function' principle important in engineering and design? Give a real-life example.",
+    modelAns:"It ensures structures are designed to do their job efficiently and safely, avoiding wasted materials or unsafe features. Example: An airplane wing is curved (form) specifically to generate lift (function)." },
+  { section:"Section E", type:"short", pts:2,
+    q:"Describe THREE reasons a structure might fail. Give a real-life example for each reason.",
+    modelAns:"1. Overload — too much weight (e.g., too many people on a balcony). 2. Material failure — rusting or rotting (e.g., a rusty bridge beam). 3. Poor design — flaws in original planning (e.g., table legs too thin to hold weight). Other valid answers: natural disasters, foundation failure, poor maintenance." },
+  { section:"Section E", type:"short", pts:2,
+    q:"What is the Ontario Building Code and why is it important? Give TWO specific things it regulates.",
+    modelAns:"The OBC sets minimum safety requirements for building construction in Ontario. It is important because it protects people from unsafe buildings. It regulates things like: fire exits, structural strength, wheelchair accessibility, electrical safety, etc." },
+  { section:"Section E", type:"short", pts:2,
+    q:"How do AESTHETICS and ERGONOMICS each influence the design of a school desk? Explain both.",
+    modelAns:"Aesthetics: the desk's colour, shape, and style should look appealing in a learning environment (e.g., clean, modern look). Ergonomics: the desk height, angle, and surface should support comfortable posture for students (e.g., adjustable height, tilted surface to reduce neck strain)." },
+
+  // SECTION F — Matching / Apply
+  { section:"Section F — Apply & Match", type:"mc", pts:1,
+    q:"Which force is experienced by the CABLES of a suspension bridge?",
+    opts:["Compression","Torsion","Tension","Shear"],
+    ans:2, exp:"The cables of a suspension bridge are stretched — they experience tension." },
+  { section:"Section F", type:"mc", pts:1,
+    q:"Which force is experienced by the COLUMNS (pillars) holding up a roof?",
+    opts:["Tension","Compression","Torsion","Bending"],
+    ans:1, exp:"Pillars/columns are squeezed by the weight above — they experience compression." },
+  { section:"Section F", type:"mc", pts:1,
+    q:"A student labels a force arrow on a diagram. The tail of the arrow should be placed at:",
+    opts:["The strongest part of the structure","The point of application of the force","The centre of mass","The top of the structure"],
+    ans:1, exp:"The tail of a force arrow is at the point of application — where the force acts." },
+  { section:"Section F", type:"mc", pts:1,
+    q:"A car body is best described as which type of structure?",
+    opts:["Solid structure","Frame structure","Shell structure","Beam structure"],
+    ans:2, exp:"A car body is a thin outer shell — a shell structure." },
+  { section:"Section F", type:"mc", pts:1,
+    q:"The magnitude of a force refers to:",
+    opts:["The direction the force is acting","The point where force is applied","The size or strength of the force (measured in Newtons)","The type of material experiencing the force"],
+    ans:2, exp:"Magnitude = size/strength of force, measured in Newtons (N)." },
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let submitted = false;
+let score = 0;
+let autoScore = 0;
+
+function startQuiz() {
+  document.getElementById('cover').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQ(0);
+}
+
+function renderQ(idx) {
+  current = idx;
+  const q = questions[idx];
+  const container = document.getElementById('qContainer');
+  const isLast = idx === questions.length - 1;
+
+  document.getElementById('prevBtn').style.display = idx > 0 ? 'block' : 'none';
+  document.getElementById('nextBtn').style.display = isLast ? 'none' : 'block';
+  document.getElementById('submitBtn').style.display = isLast ? 'block' : 'none';
+  document.getElementById('progText').textContent = `Question ${idx+1} of ${questions.length}`;
+  document.getElementById('progScore').textContent = submitted ? `Score: ${score}` : `${idx+1}/${questions.length}`;
+  document.getElementById('progFill').style.width = `${((idx+1)/questions.length)*100}%`;
+
+  let html = `<div class="q-card">
+    <div class="q-section">${q.section}</div>
+    <div class="q-num">Question ${idx+1} <span class="pts">(${q.pts} mark${q.pts>1?'s':''})</span></div>
+    <div class="q-text">${q.q}</div>`;
+
+  if (q.type === 'mc') {
+    html += `<div class="options">`;
+    q.opts.forEach((opt, oi) => {
+      let cls = 'option';
+      if (answers[idx] === oi) cls += ' selected';
+      if (submitted) {
+        if (oi === q.ans) cls += ' correct';
+        else if (answers[idx] === oi && oi !== q.ans) cls += ' wrong';
+      }
+      const letters = ['A','B','C','D'];
+      html += `<div class="${cls}" onclick="selectOpt(${idx},${oi})">
+        <div class="opt-letter">${letters[oi]}</div>
+        <div>${opt}</div>
+      </div>`;
+    });
+    html += `</div>`;
+    if (submitted) {
+      const correct = answers[idx] === q.ans;
+      html += `<div class="feedback ${correct?'correct':'wrong'}">
+        ${correct ? '✅ Correct!' : `❌ Incorrect. The answer is: <strong>${q.opts[q.ans]}</strong>`}
+        <br><em>${q.exp}</em>
+      </div>`;
+    }
+  } else {
+    // short answer
+    const val = answers[idx] || '';
+    html += `<textarea class="short-answer" placeholder="Write your answer here..." onchange="saveShort(${idx},this.value)" oninput="saveShort(${idx},this.value)">${val}</textarea>`;
+    if (submitted) {
+      html += `<div class="feedback info">
+        📝 <strong>Model Answer:</strong> ${q.modelAns}<br>
+        <em>Your teacher will review short answer responses. The model answer is shown above for reference.</em>
+      </div>`;
+    }
+  }
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function selectOpt(qIdx, optIdx) {
+  if (submitted) return;
+  answers[qIdx] = optIdx;
+  renderQ(qIdx);
+}
+
+function saveShort(qIdx, val) {
+  answers[qIdx] = val;
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < questions.length) renderQ(next);
+}
+
+function submitTest() {
+  // Check unanswered
+  const unanswered = questions.reduce((acc, q, i) => {
+    if (q.type === 'mc' && answers[i] === null) acc++;
+    return acc;
+  }, 0);
+  if (unanswered > 0) {
+    if (!confirm(`You have ${unanswered} unanswered multiple choice question(s). Submit anyway?`)) return;
+  }
+
+  submitted = true;
+  // Calculate auto score (MC only)
+  autoScore = 0;
+  questions.forEach((q, i) => {
+    if (q.type === 'mc' && answers[i] === q.ans) autoScore += q.pts;
+  });
+  const mcTotal = questions.filter(q => q.type === 'mc').reduce((a,q)=>a+q.pts,0);
+  const shortTotal = questions.filter(q => q.type === 'short').reduce((a,q)=>a+q.pts,0);
+  score = autoScore;
+
+  showResults(autoScore, mcTotal, shortTotal);
+}
+
+function showResults(autoScore, mcTotal, shortTotal) {
+  document.getElementById('quiz').style.display = 'none';
+  const res = document.getElementById('results');
+  res.style.display = 'block';
+
+  const pct = Math.round((autoScore / mcTotal) * 100);
+  let grade = '', emoji = '';
+  if (pct >= 90) { grade = 'Outstanding! 🌟'; emoji = '🏆'; }
+  else if (pct >= 80) { grade = 'Great Work! 👏'; emoji = '⭐'; }
+  else if (pct >= 70) { grade = 'Good Effort! 👍'; emoji = '😊'; }
+  else if (pct >= 60) { grade = 'Keep Practising! 📚'; emoji = '💪'; }
+  else { grade = 'Review Your Notes! 📖'; emoji = '🔄'; }
+
+  const correct = questions.filter((q,i) => q.type==='mc' && answers[i]===q.ans).length;
+  const mcCount = questions.filter(q=>q.type==='mc').length;
+
+  let reviewHtml = '';
+  questions.forEach((q, i) => {
+    if (q.type === 'mc') {
+      const isCorrect = answers[i] === q.ans;
+      reviewHtml += `<div class="review-item ${isCorrect?'correct':'wrong'}">
+        <div class="ri-q">${i+1}. ${q.q}</div>
+        <div class="ri-your">Your answer: <strong>${answers[i]!==null ? q.opts[answers[i]] : 'Not answered'}</strong></div>
+        ${!isCorrect ? `<div class="ri-answer">✅ Correct answer: ${q.opts[q.ans]}</div>` : '<div style="color:#166534;font-size:.85rem;font-weight:700;">✅ Correct!</div>'}
+      </div>`;
+    } else {
+      reviewHtml += `<div class="review-item manual">
+        <div class="ri-q">${i+1}. ${q.q} <span style="color:#92400e;font-size:.8rem;">(${q.pts} marks — teacher review)</span></div>
+        <div class="ri-your">Your answer: <em>${answers[i] || 'Not answered'}</em></div>
+        <div class="ri-answer">📝 Model: ${q.modelAns}</div>
+      </div>`;
+    }
+  });
+
+  res.innerHTML = `
+    <div class="result-hero">
+      <div style="font-size:3rem;margin-bottom:.5rem;">${emoji}</div>
+      <div class="score-big">${autoScore}/${mcTotal}</div>
+      <div class="score-label">Multiple Choice Score</div>
+      <div class="score-grade">${grade}</div>
+      <div style="margin-top:.5rem;font-size:.9rem;opacity:.8;">+ ${shortTotal} marks of short answer to be reviewed by your teacher</div>
+    </div>
+    <div class="breakdown-grid">
+      <div class="bk-card"><div class="bk-icon">✅</div><div class="bk-val">${correct}/${mcCount}</div><div class="bk-lbl">MC Correct</div></div>
+      <div class="bk-card"><div class="bk-icon">📊</div><div class="bk-val">${pct}%</div><div class="bk-lbl">MC Percentage</div></div>
+      <div class="bk-card"><div class="bk-icon">✍️</div><div class="bk-val">${shortTotal}</div><div class="bk-lbl">Short Answer Marks Available</div></div>
+      <div class="bk-card"><div class="bk-icon">📝</div><div class="bk-val">${questions.length}</div><div class="bk-lbl">Total Questions</div></div>
+    </div>
+    <h2 style="font-size:1.3rem;font-weight:800;color:#1F4E79;margin-bottom:1rem;">📋 Question Review</h2>
+    ${reviewHtml}
+    <button class="restart-btn" onclick="location.reload()">🔄 Restart Test</button>
+  `;
+  res.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
